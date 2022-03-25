@@ -7,8 +7,8 @@ export default function Header() {
   return (
     <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank" rel="noopener noreferrer">
       <PageHeader
-        title="🏗 scaffold-eth"
-        subTitle="forkable Ethereum dev stack focused on fast product iteration"
+        title="🧻 T.P.O.F."
+        subTitle="A place to rank toilet paper orientations, with your wallet!"
         style={{ cursor: "pointer" }}
       />
     </a>

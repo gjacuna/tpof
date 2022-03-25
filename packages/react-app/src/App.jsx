@@ -1,13 +1,6 @@
-import { Button, Col, Menu, Row } from "antd";
+import { Button, Col, Menu, Row, Typography } from "antd";
 import "antd/dist/antd.css";
-import {
-  useBalance,
-  useContractLoader,
-  useContractReader,
-  useGasPrice,
-  useOnBlock,
-  useUserProviderAndSigner,
-} from "eth-hooks";
+import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation } from "react-router-dom";
@@ -19,18 +12,22 @@ import {
   GasGauge,
   Header,
   Ramp,
+  Propose,
   ThemeSwitch,
   NetworkDisplay,
   FaucetHint,
   NetworkSwitch,
+  Proposals,
+  TokenBalance,
 } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Home, ExampleUI, Hints, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+
+const { Paragraph } = Typography;
 
 const { ethers } = require("ethers");
 /*
@@ -161,19 +158,6 @@ function App(props) {
     console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
   });
 
-  // Then read your DAI balance like:
-  const myMainnetDAIBalance = useContractReader(mainnetContracts, "DAI", "balanceOf", [
-    "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-  ]);
-
-  // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
-
-  /*
-  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
-  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
-  */
-
   //
   // 🧫 DEBUG 👨🏻‍🔬
   //
@@ -198,7 +182,6 @@ function App(props) {
       console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
       console.log("📝 readContracts", readContracts);
       console.log("🌍 DAI contract on mainnet:", mainnetContracts);
-      console.log("💵 yourMainnetDAIBalance", myMainnetDAIBalance);
       console.log("🔐 writeContracts", writeContracts);
     }
   }, [
@@ -211,7 +194,6 @@ function App(props) {
     writeContracts,
     mainnetContracts,
     localChainId,
-    myMainnetDAIBalance,
   ]);
 
   const loadWeb3Modal = useCallback(async () => {
@@ -258,29 +240,49 @@ function App(props) {
       />
       <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/">
-          <Link to="/">App Home</Link>
+          <Link to="/">✍️ Voting</Link>
+        </Menu.Item>
+        <Menu.Item key="/about">
+          <Link to="/about">🤑 About</Link>
         </Menu.Item>
         <Menu.Item key="/debug">
-          <Link to="/debug">Debug Contracts</Link>
-        </Menu.Item>
-        <Menu.Item key="/hints">
-          <Link to="/hints">Hints</Link>
-        </Menu.Item>
-        <Menu.Item key="/exampleui">
-          <Link to="/exampleui">ExampleUI</Link>
-        </Menu.Item>
-        <Menu.Item key="/mainnetdai">
-          <Link to="/mainnetdai">Mainnet DAI</Link>
-        </Menu.Item>
-        <Menu.Item key="/subgraph">
-          <Link to="/subgraph">Subgraph</Link>
+          <Link to="/debug">🐞 Debug</Link>
         </Menu.Item>
       </Menu>
 
       <Switch>
         <Route exact path="/">
-          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} />
+          <Row justify="center" style={{ marginBottom: "5rem" }}>
+            <Col xl={13} xs={22}>
+              <Paragraph style={{ fontSize: 15, lineHeight: "2.5rem" }}>
+                Hello Anon,
+                <br />
+                Welcome to the ultimate (infinite) game of putting your money where your mouth is.
+                <br />
+                Help us answer humanity's ultimate question: <b>Which way to roll our toilet paper?</b>
+              </Paragraph>
+              <Paragraph>
+                TIP: Your have <TokenBalance contracts={readContracts} name={"SheetToken"} address={address} /> of clean
+                white SHEET available to stake
+              </Paragraph>
+            </Col>
+          </Row>
+          <Proposals
+            address={address}
+            readContracts={readContracts}
+            writeContracts={writeContracts}
+            tx={tx}
+            loadWeb3Modal={loadWeb3Modal}
+            localProvider={localProvider}
+          />
+          <Propose
+            address={address}
+            readContracts={readContracts}
+            writeContracts={writeContracts}
+            tx={tx}
+            loadWeb3Modal={loadWeb3Modal}
+            localProvider={localProvider}
+          />
         </Route>
         <Route exact path="/debug">
           {/*
@@ -290,7 +292,16 @@ function App(props) {
             */}
 
           <Contract
-            name="YourContract"
+            name="SheetToken"
+            price={price}
+            signer={userSigner}
+            provider={localProvider}
+            address={address}
+            blockExplorer={blockExplorer}
+            contractConfig={contractConfig}
+          />
+          <Contract
+            name="Discover"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -299,57 +310,40 @@ function App(props) {
             contractConfig={contractConfig}
           />
         </Route>
-        <Route path="/hints">
-          <Hints
-            address={address}
-            yourLocalBalance={yourLocalBalance}
-            mainnetProvider={mainnetProvider}
-            price={price}
-          />
-        </Route>
-        <Route path="/exampleui">
-          <ExampleUI
-            address={address}
-            userSigner={userSigner}
-            mainnetProvider={mainnetProvider}
-            localProvider={localProvider}
-            yourLocalBalance={yourLocalBalance}
-            price={price}
-            tx={tx}
-            writeContracts={writeContracts}
-            readContracts={readContracts}
-            purpose={purpose}
-          />
-        </Route>
-        <Route path="/mainnetdai">
-          <Contract
-            name="DAI"
-            customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
-            signer={userSigner}
-            provider={mainnetProvider}
-            address={address}
-            blockExplorer="https://etherscan.io/"
-            contractConfig={contractConfig}
-            chainId={1}
-          />
-          {/*
-            <Contract
-              name="UNI"
-              customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.UNI}
-              signer={userSigner}
-              provider={mainnetProvider}
-              address={address}
-              blockExplorer="https://etherscan.io/"
-            />
-            */}
-        </Route>
-        <Route path="/subgraph">
-          <Subgraph
-            subgraphUri={props.subgraphUri}
-            tx={tx}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
+        <Route path="/about">
+          <Row justify="center" style={{ marginBottom: "5rem" }}>
+            <Col xl={13} xs={22}>
+              <Paragraph style={{ fontSize: 15, lineHeight: "2.5rem" }}>
+                The Toilet Paper Orientation Foundation aims to answer modern life's greatest question: What is the
+                correct way to orient your toilet paper.
+                <br />
+                We know this has troubled generations upon generations, and we need your help to settle this matter once
+                and for all.
+              </Paragraph>
+              <Paragraph style={{ fontSize: 15, lineHeight: "2.5rem" }}>
+                This voting mechanism, the contract, and the whole premise is inspired (cough cough copied) by{" "}
+                <a href="https://dap.ps/" target={"_blank"} rel="noreferrer">
+                  Dapps Discover
+                </a>
+                , from Status.
+                <br />
+                You can read the full mathematical explanation by the great{" "}
+                <a href="https://twitter.com/cryptowanderer" target={"_blank"} rel="noreferrer">
+                  Cryptowanderer
+                </a>{" "}
+                here:{" "}
+                <a href="https://observablehq.com/@andytudhope/embedded-discover" target={"_blank"} rel="noreferrer">
+                  MATH
+                </a>
+                ; and checkout the official repo here:{" "}
+                <a href="https://github.com/dap-ps/discover" target={"_blank"} rel="noreferrer">
+                  REPO
+                </a>
+                .
+                <br />I just simplified it a little and built a hopefully composable repo with Scaffold-ETH.
+              </Paragraph>
+            </Col>
+          </Row>
         </Route>
       </Switch>
 
