@@ -18,7 +18,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const chainId = await getChainId();
   const SheetToken = await ethers.getContract("SheetToken", deployer);
 
-  await deploy("Discover", {
+  await deploy("SheetFaucet", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     args: [SheetToken.address],
@@ -35,9 +35,14 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
     //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   */
-  const Discover = await ethers.getContract("Discover", deployer);
-  // await Discover.transferOwnership(
+  const SheetFaucet = await ethers.getContract("SheetFaucet", deployer);
+  // await SheetFaucet.transferOwnership(
   //   "0x40f9bf922c23c43acdad71Ab4425280C0ffBD697"
+  // );
+
+  // await SheetToken.transfer(
+  //   SheetFaucet.address,
+  //   ethers.utils.parseEther("68420024")
   // );
 
   /*
@@ -71,8 +76,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   try {
     if (chainId !== localChainId) {
       await run("verify:verify", {
-        address: Discover.address,
-        contract: "contracts/Discover.sol:Discover",
+        address: SheetFaucet.address,
+        contract: "contracts/SheetFaucet.sol:SheetFaucet",
         constructorArguments: [SheetToken.address],
       });
     }
@@ -80,4 +85,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     console.error(error);
   }
 };
-module.exports.tags = ["Discover"];
+module.exports.tags = ["SheetFaucet"];

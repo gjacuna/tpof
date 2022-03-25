@@ -50,7 +50,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.goerli; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -75,6 +75,7 @@ function App(props) {
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
+  const [sheetFaucet, setSheetFaucet] = useState();
   const location = useLocation();
 
   const targetNetwork = NETWORKS[selectedNetwork];
@@ -265,6 +266,15 @@ function App(props) {
                 TIP: Your have <TokenBalance contracts={readContracts} name={"SheetToken"} address={address} /> of clean
                 white SHEET available to stake
               </Paragraph>
+              <Button
+                onClick={async () => {
+                  setSheetFaucet(true);
+                  await tx(writeContracts.SheetFaucet.withdraw());
+                  setSheetFaucet(false);
+                }}
+              >
+                Faucet: Get Some Clean SHEETs to Stake
+              </Button>
             </Col>
           </Row>
           <Proposals
@@ -293,6 +303,15 @@ function App(props) {
 
           <Contract
             name="SheetToken"
+            price={price}
+            signer={userSigner}
+            provider={localProvider}
+            address={address}
+            blockExplorer={blockExplorer}
+            contractConfig={contractConfig}
+          />
+          <Contract
+            name="SheetFaucet"
             price={price}
             signer={userSigner}
             provider={localProvider}

@@ -27,10 +27,10 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // Getting a previously deployed contract
   const SheetToken = await ethers.getContract("SheetToken", deployer);
-  SheetToken.transfer(
-    "0x6fA48F2803769322aaB49Cea2d829C36B849852F",
-    ethers.utils.parseEther("100000")
-  );
+  // await SheetToken.transfer(
+  //   "0x40f9bf922c23c43acdad71Ab4425280C0ffBD697",
+  //   ethers.utils.parseEther("1000000")
+  // );
 
   /*  await YourContract.setPurpose("Hello");
   
@@ -69,16 +69,16 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // You can also Verify your contracts with Etherscan here...
   // You don't want to verify on localhost
-  // try {
-  //   if (chainId !== localChainId) {
-  //     await run("verify:verify", {
-  //       address: YourContract.address,
-  //       contract: "contracts/YourContract.sol:YourContract",
-  //       contractArguments: [],
-  //     });
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-  // }
+  try {
+    if (chainId !== localChainId) {
+      await run("verify:verify", {
+        address: SheetToken.address,
+        contract: "contracts/SheetToken.sol:SheetToken",
+        constructorArguments: [],
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 module.exports.tags = ["SheetToken"];
